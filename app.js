@@ -16,7 +16,7 @@ const server = http.Server(app);
 const io = socketIO(server);
 
 const players = {}
-// const bullets = {};
+const bullets = [];
 
 app.use(express.static("public"))
 
@@ -37,18 +37,48 @@ io.on("connection", socket => {
     })
 
     socket.on("shot fired", data => {
-      players[socket.id].bullets.push(new bulletClass(players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
+      bullets.push(new bulletClass({
+        id: socket.id,
+        px: players[socket.id].x,
+        py: players[socket.id].y,
+        mx: data.mouseX,
+        my: data.mouseY,
+        cw: data.cWidth,
+        ch: data.cHeight
+      }))
+      // bullets.push(new bulletClass(socket.id, players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
+      // for (let player in players) {
+        // players[player].bullets.push(new bulletClass(players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
+        // if (player == socket.id) {
+        //
+        // } else {
+        //   players[player].enemyBullets.push(
+        //     new bulletClass(
+        //       players[socket.id].x,
+        //       players[socket.id].y,
+        //       data.mouseX,
+        //       data.mouseY
+        //     ))
+        // }
+      // }
     })
 
     setInterval(() => {
 
       for (let player in players) {
-        players[player].update()
-
-        io.emit("update canvas", {
-          players: players,
-        })
+        players[player].move()
       }
+      bullets.forEach(bullet => {
+        bullet.move()
+      })
+      // for (let bullet in bullets) {
+      //   bullets[bullet].move()
+      // }
+      io.emit("update canvas", {
+        players: players,
+        bullets: bullets
+      })
+
     }, 1000/60)
   })
   socket.on("disconnect", () => {

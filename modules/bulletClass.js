@@ -1,16 +1,19 @@
 module.exports = class Bullet {
-  constructor(xStart, yStart, mouseX, mouseY) {
+  constructor(data) {
+    this.id = data.id;
     this.speed = 10;
     this.size = 10;
     this.xSpeed;
     this.ySpeed;
     this.angle;
-    this.x = xStart;
-    this.y = yStart;
-    this.xStart = xStart;
-    this.yStart = yStart;
-    this.mouseX = mouseX;
-    this.mouseY = mouseY;
+    this.cWidth = data.cw;
+    this.cHeight = data.ch;
+    this.x = data.px;
+    this.y = data.py;
+    this.xStart = data.px;
+    this.yStart = data.py;
+    this.mouseX = data.mx;
+    this.mouseY = data.my;
     this.xDistance = this.mouseX - this.xStart;
     this.yDistance = this.mouseY - this.yStart;
 
@@ -40,9 +43,13 @@ module.exports = class Bullet {
     }
   }
 
-  checkPos(index, canvas) {
+  checkPos() {
+    // if (this.checkHit() <= this.size) {
+    //   return true
+    // }
     if (this.y + this.size < 0 || this.y - this.size > canvas.height) {
       // this.bullets.splice(index, 1)
+
       return true;
     }
 
@@ -54,8 +61,25 @@ module.exports = class Bullet {
     // console.log(bullets)
   }
 
+
+  //
+  // checkHit() {
+  //   function hypotenuse(a, b) {
+  //     return Math.sqrt((a * a) + (b * b))
+  //   }
+  //
+  //
+  //
+  //     const xDis = Math.abs(this.players[p].x - this.x);
+  //     const yDis = Math.abs(this.players[p].y - this.y);
+  //
+  //     return hypotenuse(xDis, yDis);
+  // }
+
   direction() {
     // Source: https://stackoverflow.com/questions/17009252/html5-game-canvas-calculate-speed-and-direction-for-bullet-using-last-velx-and
+
+    console.log(this.players)
     this.angle = Math.atan(Math.abs(this.yDistance / this.xDistance))
     this.xSpeed = this.speed * Math.cos(this.angle)
     this.ySpeed = this.speed * Math.sin(this.angle)
