@@ -1,13 +1,18 @@
 "use strict";
 
+const socket = io();
+
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
-const cWidth = canvas.offsetWidth;
-const cHeight = canvas.offsetHeight;
+(() => {
+  const cWidth = canvas.offsetWidth;
+  const cHeight = canvas.offsetHeight;
 
-canvas.setAttribute("width", cWidth);
-canvas.setAttribute("height", cHeight);
+  canvas.setAttribute("width", cWidth);
+  canvas.setAttribute("height", cHeight);
+})()
+
 
 const players = [];
 const bullets = [];
@@ -108,6 +113,7 @@ class Bullet {
   }
 
   direction() {
+    // Source: https://stackoverflow.com/questions/17009252/html5-game-canvas-calculate-speed-and-direction-for-bullet-using-last-velx-and
     this.angle = Math.atan(Math.abs(this.yDistance / this.xDistance))
     this.xSpeed = this.speed * Math.cos(this.angle)
     this.ySpeed = this.speed * Math.sin(this.angle)
