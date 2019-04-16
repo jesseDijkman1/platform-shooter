@@ -1,12 +1,13 @@
 module.exports = class Player {
-  constructor(id, size, color, speed, cWidth, cHeight) {
-    this.id = id
-    this.size = size;
-    this.color = color;
-    this.speed = speed;
+  constructor(data) {
+    this.id = data.id
+    this.size = data.size;
+    this.color = data.color;
+    this.speed = data.speed;
+    this.health = 100;
     this.canvas = {
-      width: cWidth,
-      height: cHeight
+      width: data.cWidth,
+      height: data.cHeight
     }
     this.x = 250;
     this.y = 250;
@@ -19,19 +20,7 @@ module.exports = class Player {
     this.keys = keys
   }
 
-  // update() {
-    // this.move()
 
-    // this.bullets.forEach((b, i) => {
-    //   b.move()
-    //
-    //   // Remove the bullet when not on the canvas
-    //   if (b.checkPos(i, this.canvas)) {
-    //     this.bullets.splice(i, 1);
-    //   }
-    //
-    // })
-  // }
 
   move() {
     if (this.keys[37] || this.keys[65]) {
@@ -61,8 +50,22 @@ module.exports = class Player {
       if (this.y + this.size < this.canvas.height) {
         this.y += this.speed
       }
-
     }
+  }
+
+  checkHit(bullets) {
+    bullets.forEach((b, i) => {
+      const xDist = Math.abs(b.x - this.x);
+      const yDist = Math.abs(b.y - this.y);
+      const distance = Math.sqrt((xDist * xDist) + (yDist * yDist)) - (b.size + this.size);
+
+      if (distance <= 0 && b.id != this.id) {
+        b.move()
+        bullets.splice(i, 1);
+      }
+    })
+
+    // console.log(bullets)
   }
 
   shoot(e) {

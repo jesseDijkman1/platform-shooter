@@ -1,7 +1,7 @@
 module.exports = class Bullet {
   constructor(data) {
     this.id = data.id;
-    this.speed = 10;
+    this.speed = 5;
     this.size = 10;
     this.xSpeed;
     this.ySpeed;
@@ -44,18 +44,13 @@ module.exports = class Bullet {
   }
 
   checkPos() {
-    // if (this.checkHit() <= this.size) {
-    //   return true
-    // }
-    if (this.y + this.size < 0 || this.y - this.size > canvas.height) {
-      // this.bullets.splice(index, 1)
 
-      return true;
+    if (this.y + this.size < 0 || this.y - this.size > this.cHeight) {
+      return true
     }
 
-    if (this.x + this.size < 0 || this.x - this.size > canvas.width) {
-      // this.bullets.splice(index, 1)
-      return true;
+    if (this.x + this.size < 0 || this.x - this.size > this.cWidth) {
+      return true
     }
 
     // console.log(bullets)

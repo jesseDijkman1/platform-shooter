@@ -18,6 +18,8 @@ const io = socketIO(server);
 const players = {}
 const bullets = [];
 
+const availableColors = ["blue", "green", "yellow", "orange"]
+
 app.use(express.static("public"))
 
 app.get("/", (req, res) => {
@@ -30,7 +32,17 @@ io.on("connection", socket => {
   console.log(`${socket.id} connected`)
 
   socket.on("init", canvasData => {
-    players[socket.id] = new playerClass(socket.id, 20, "blue", 3, canvasData.cWidth, canvasData.cHeight)
+    // players[socket.id] = new playerClass(socket.id, 20, players, 3, canvasData.cWidth, canvasData.cHeight)
+
+
+    players[socket.id] = new playerClass({
+      id: socket.id,
+      size: 20,
+      color: availableColors[Object.keys(players).length],
+      speed: 3,
+      cWidth: canvasData.cWidth,
+      cHeight: canvasData.cHeight
+    })
 
     socket.on("pressed keys", keys => {
       players[socket.id].keypress(keys)
@@ -64,16 +76,21 @@ io.on("connection", socket => {
     })
 
     setInterval(() => {
-
       for (let player in players) {
         players[player].move()
+        players[player].checkHit(bullets)
       }
-      bullets.forEach(bullet => {
-        bullet.move()
+
+      bullets.forEach((b, i) => {
+        b.move()
+
+        if (b.checkPos()) {
+          bullets.splice(i, 1)
+        }
       })
-      // for (let bullet in bullets) {
-      //   bullets[bullet].move()
-      // }
+
+
+
       io.emit("update canvas", {
         players: players,
         bullets: bullets
