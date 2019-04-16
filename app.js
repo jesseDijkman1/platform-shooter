@@ -16,6 +16,7 @@ const server = http.Server(app);
 const io = socketIO(server);
 
 const players = {}
+// const bullets = {};
 
 app.use(express.static("public"))
 
@@ -28,22 +29,28 @@ app.get("/", (req, res) => {
 io.on("connection", socket => {
   console.log(`${socket.id} connected`)
 
-  players[socket.id] = new playerClass(socket.id, 20, "blue", 3)
+  socket.on("init", canvasData => {
+    players[socket.id] = new playerClass(socket.id, 20, "blue", 3, canvasData.cWidth, canvasData.cHeight)
 
-  socket.on("pressed keys", keys => {
-    players[socket.id].keypress(keys)
+    socket.on("pressed keys", keys => {
+      players[socket.id].keypress(keys)
+    })
+
+    socket.on("shot fired", data => {
+      players[socket.id].bullets.push(new bulletClass(players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
+    })
+
+    setInterval(() => {
+
+      for (let player in players) {
+        players[player].update()
+
+        io.emit("update canvas", {
+          players: players,
+        })
+      }
+    }, 1000/60)
   })
-
-  setInterval(() => {
-    for (let player in players) {
-      players[player].move()
-
-      socket.emit("update canvas", {
-        players: players
-      })
-    }
-  }, 1000/60)
-
   socket.on("disconnect", () => {
     console.log(`${socket.id} disconnected`)
 

@@ -1,22 +1,37 @@
 module.exports = class Player {
-  constructor(id, size, color, speed) {
+  constructor(id, size, color, speed, cWidth, cHeight) {
     this.id = id
     this.size = size;
     this.color = color;
     this.speed = speed;
+    // this.cWidth = cWidth;
+    // this.cHeight = cHeight;
+    this.canvas = {
+      width: cWidth,
+      height: cHeight
+    }
     this.x = 250;
     this.y = 250;
     this.keys = {};
-
+    this.bullets = [];
   }
 
   keypress(keys) {
     this.keys = keys
   }
 
-  // update() {
-  //   this.move()
-  // }
+  update() {
+    this.move()
+
+    this.bullets.forEach((b, i) => {
+      b.move()
+
+      // Remove the bullet when not on the canvas
+      if (b.checkPos(i, this.canvas)) {
+        this.bullets.splice(i, 1)
+      }
+    })
+  }
 
   move() {
 

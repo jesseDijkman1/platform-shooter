@@ -4,6 +4,7 @@ module.exports = class Bullet {
     this.size = 10;
     this.xSpeed;
     this.ySpeed;
+    this.angle;
     this.x = xStart;
     this.y = yStart;
     this.xStart = xStart;
@@ -13,17 +14,17 @@ module.exports = class Bullet {
     this.xDistance = this.mouseX - this.xStart;
     this.yDistance = this.mouseY - this.yStart;
 
-    this.angle = this.direction()
+    this.direction()
   }
-
-  draw() {
-    this.move()
-
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
-    ctx.fillStyle = "black";
-    ctx.fill()
-  }
+  //
+  // update() {
+  //   this.move()
+  //
+  //   // ctx.beginPath()
+  //   // ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+  //   // ctx.fillStyle = "black";
+  //   // ctx.fill()
+  // }
 
   move() {
     if (this.mouseX < this.xStart) {
@@ -39,16 +40,18 @@ module.exports = class Bullet {
     }
   }
 
-  checkPos(index) {
-    if (this.y + this.size < 0 || this.y - this.size > cHeight) {
-      bullets.splice(this.index, 1)
+  checkPos(index, canvas) {
+    if (this.y + this.size < 0 || this.y - this.size > canvas.height) {
+      // this.bullets.splice(index, 1)
+      return true;
     }
 
-    if (this.x + this.size < 0 || this.x - this.size > cWidth) {
-      bullets.splice(this.index, 1)
+    if (this.x + this.size < 0 || this.x - this.size > canvas.width) {
+      // this.bullets.splice(index, 1)
+      return true;
     }
 
-    console.log(bullets)
+    // console.log(bullets)
   }
 
   direction() {

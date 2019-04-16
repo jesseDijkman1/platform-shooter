@@ -2,20 +2,23 @@
 
 const socket = io();
 
-socket.emit("shot fired", "hllo")
-
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
-const cWidth = canvas.offsetWidth;
-const cHeight = canvas.offsetHeight;
+let cWidth;
+let cHeight;
 
 // Set the canvas width and height to it's css width and height
-function updateCanvas() {
+(() => {
+  cWidth = canvas.offsetWidth;
+  cHeight = canvas.offsetHeight;
+
   canvas.setAttribute("width", cWidth);
   canvas.setAttribute("height", cHeight);
-}
 
-updateCanvas()
+  socket.emit("init", {cWidth: cWidth, cHeight: cHeight})
+})()
+
+// updateCanvas()
 
 function events() {
   const pressedKeys = {};
@@ -43,6 +46,13 @@ function events() {
 
     return socket.emit("pressed keys", pressedKeys);
   })
+
+  canvas.addEventListener("click", e => {
+    socket.emit("shot fired", {
+        mouseX: e.pageX - e.currentTarget.offsetLeft,
+        mouseY: e.pageY - e.currentTarget.offsetTop,
+      })
+  })
 }
 
 events()
@@ -57,7 +67,16 @@ socket.on("update canvas", data => {
     ctx.arc(playerData.x, playerData.y, playerData.size, 0, 2 * Math.PI);
     ctx.fillStyle = playerData.color;
     ctx.fill()
+
+    playerData.bullets.forEach(b => {
+      ctx.beginPath()
+      ctx.arc(b.x, b.y, b.size, 0, 2 * Math.PI);
+      ctx.fillStyle = "black";
+      ctx.fill()
+    })
   }
+
+
 
   // for (let bullet in data.bullets) {
   //
