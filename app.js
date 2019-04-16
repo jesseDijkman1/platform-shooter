@@ -1,40 +1,62 @@
 "use strict"
 
-const express = require("express");
-const http = require("http");
-const socketIO = require("socket.io");
-const path = require("path");
+////////////////////////////
+// ==== Node Modules ==== //
+////////////////////////////
 
-// Game modules
-const playerClass = require("./modules/playerClass.js");
-const bulletClass = require("./modules/bulletClass.js");
+const express = require("express"),
+      http = require("http"),
+      socketIO = require("socket.io"),
+      path = require("path");
 
-const port = 2000;
+////////////////////////////
+// ==== Game Classes ==== //
+////////////////////////////
 
-const app = express();
-const server = http.Server(app);
-const io = socketIO(server);
+const playerClass = require("./classes/playerClass.js"),
+      bulletClass = require("./classes/bulletClass.js");
 
-const players = {}
-const bullets = [];
+/////////////////////////
+// ==== Constants ==== //
+/////////////////////////
 
-const availableColors = ["blue", "green", "yellow", "orange"]
+const availableColors = ["blue", "green", "yellow", "orange"],
+      port = 2000;
+
+///////////////////////////////
+// ==== Data Containers ==== //
+///////////////////////////////
+
+const players = {},
+      bullets = [];
+
+
+//////////////////////////
+// ==== Middleware ==== //
+//////////////////////////
+
+const app = express(),
+      server = http.Server(app),
+      io = socketIO(server);
 
 app.use(express.static("public"))
 
-app.get("/", (req, res) => {
-  res.sendFile(`${__dirname}/public/index.html`)
-})
+///////////////////////
+// ==== Routing ==== //
+///////////////////////
 
+app.get("/", (req, res) => res.sendFile(`${__dirname}/public/index.html`));
 
+/////////////////////////
+// ==== Socket.io ==== //
+/////////////////////////
 
 io.on("connection", socket => {
   console.log(`${socket.id} connected`)
 
   socket.on("init", canvasData => {
-    // players[socket.id] = new playerClass(socket.id, 20, players, 3, canvasData.cWidth, canvasData.cHeight)
 
-
+    // Create a new instance of a player
     players[socket.id] = new playerClass({
       id: socket.id,
       size: 20,
@@ -44,10 +66,10 @@ io.on("connection", socket => {
       cHeight: canvasData.cHeight
     })
 
-    socket.on("pressed keys", keys => {
-      players[socket.id].keypress(keys)
-    })
+    // Any key is pressed
+    socket.on("pressed keys", keys => players[socket.id].keypress(keys))
 
+    // A user clicks
     socket.on("shot fired", data => {
       bullets.push(new bulletClass({
         id: socket.id,
@@ -58,44 +80,33 @@ io.on("connection", socket => {
         cw: data.cWidth,
         ch: data.cHeight
       }))
-      // bullets.push(new bulletClass(socket.id, players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
-      // for (let player in players) {
-        // players[player].bullets.push(new bulletClass(players[socket.id].x, players[socket.id].y, data.mouseX, data.mouseY))
-        // if (player == socket.id) {
-        //
-        // } else {
-        //   players[player].enemyBullets.push(
-        //     new bulletClass(
-        //       players[socket.id].x,
-        //       players[socket.id].y,
-        //       data.mouseX,
-        //       data.mouseY
-        //     ))
-        // }
-      // }
     })
 
     setInterval(() => {
       for (let player in players) {
+        // Update the players positions
         players[player].move()
+
+        // Check if the hypothenuse is 0 between any ball and any player
         players[player].checkHit(bullets)
       }
 
       bullets.forEach((b, i) => {
+        // Update the bullets their positions
         b.move()
 
+        // If the bullets are outside the canvas, remove them
         if (b.checkPos()) {
+          console.log("removed")
           bullets.splice(i, 1)
         }
       })
 
-
-
+      // Send all data for the client to render
       io.emit("update canvas", {
         players: players,
         bullets: bullets
       })
-
     }, 1000/60)
   })
   socket.on("disconnect", () => {
